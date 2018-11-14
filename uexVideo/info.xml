@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <uexplugins>
-    <plugin uexName="uexVideo" version="4.0.9" build = "9">
-        <info>9:修复魅族手机上videoPicker方法在小米手机打开的不是视频列表</info>
+    <plugin uexName="uexVideo" version="4.3.8" build = "9">
+        <info>9:添加动态权限申请;修复魅族手机上videoPicker方法在小米手机打开的不是视频列表</info>
         <build>8:修复record及播放问题</build>
         <build>7:新增videoPicker接口</build>
         <build>6:openPlayer接口新增isAutoEndFullScreen参数</build>

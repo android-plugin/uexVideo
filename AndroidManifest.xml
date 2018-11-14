@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="org.zywx.wbpalmstar.widgetone.uexvideo"
     android:installLocation="internalOnly"
     android:versionCode="1"
-    android:versionName="1.0" >
+    android:versionName="1.0">
 
     <!-- uexVideo -->
     <uses-permission android:name="android.permission.CAMERA"/>
@@ -18,7 +19,8 @@
         android:hardwareAccelerated="true"
         android:icon="@drawable/icon"
         android:debuggable="true"
-        android:label="uexVideo" >
+        android:label="uexVideo"
+        tools:replace="android:label">
         <activity
             android:name="org.zywx.wbpalmstar.engine.LoadingActivity"
             android:configChanges="keyboardHidden|orientation"
