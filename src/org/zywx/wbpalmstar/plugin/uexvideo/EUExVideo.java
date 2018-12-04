@@ -23,6 +23,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.provider.MediaStore;
@@ -257,8 +258,18 @@ public class EUExVideo extends EUExBase implements Parcelable {
     }
 
     public void videoPicker(String[] params) {
-        Intent i = new Intent(Intent.ACTION_PICK, MediaStore.Video.Media.EXTERNAL_CONTENT_URI);
-        startActivityForResult(i, REQUEST_VIDEO_PICKER);
+//        Intent i = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Video.Media.EXTERNAL_CONTENT_URI);
+//        i .setDataAndType(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, "video/*");
+        Intent intent = new Intent();
+        if (Build.VERSION.SDK_INT < 19) {
+            intent.setAction(Intent.ACTION_GET_CONTENT);
+            intent.setType("video/*");
+        } else {
+            intent.setAction(Intent.ACTION_OPEN_DOCUMENT);
+            intent.addCategory(Intent.CATEGORY_OPENABLE);
+            intent.setType("video/*");
+        }
+        startActivityForResult(intent, REQUEST_VIDEO_PICKER);
     }
 
     public void closePlayerCallBack(String src, int progress) {
@@ -391,28 +402,16 @@ public class EUExVideo extends EUExBase implements Parcelable {
             // 选择视频
             if (requestCode == REQUEST_VIDEO_PICKER) {
                 if (resultCode == Activity.RESULT_OK) {
-                    Uri selectedVideo = data.getData();
-                    String[] filePathColumn = {MediaStore.Video.Media.DATA};
-                    Cursor cursor = mContext.getContentResolver().query(selectedVideo,
-                            filePathColumn, null, null, null);
-                    if (cursor == null) {
-                        errorCallback(0, 0, "uexImage 选择视频 失败");
-                        return;
-                    }
+                    String videoPath = GetPathFromUri.getPath(mContext, data.getData());
                     try {
                         JSONArray dataList = new JSONArray();
-                        while (cursor.moveToNext()) {
-                            JSONObject video = new JSONObject();
-                            int columnIndex = cursor.getColumnIndex(filePathColumn[0]);
-                            String videoPath = cursor.getString(columnIndex);
-                            video.put("src", videoPath);
-                            dataList.put(video);
-                        }
+                        JSONObject video = new JSONObject();
+                        video.put("src", videoPath);
+                        dataList.put(video);
                         jsonObject.put("data", dataList);
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
-                    cursor.close();
                     jsonObject.put("isCancelled", false);
                 } else {
                     jsonObject.put("isCancelled", true);
