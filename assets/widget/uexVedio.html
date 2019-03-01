@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+</head>
+
+<script>
+		window.uexOnload = function() {
+			uexVideo.onPlayerClose = function(info) {
+				alert(info);
+			};
+
+			uexVideo.onPlayerStatusChange = function(info) {
+				alert(info);
+			};
+
+			uexVideo.onRecordFinish = function(info) {
+				alert("onRecordFinish:" + info);
+			};
+			uexVideo.onPlayerFinish = function() {
+				alert("video completed!");
+			};
+			uexVideo.onPlayerEndTime = function() {
+				alert("onPlayerEndTime:==============");
+			}
+
+			uexVideo.onVideoPickerClosed = function(data) {
+				alert("onVideoPickerClosed:" + JSON.stringify(data));
+			};
+
+		}
+
+		uexVideo.onExportWithProgress = function(progress) {
+			console.log(progress);
+		}
+
+		function openPlayer() {
+			var param = {
+				src: "res://1.mp4",
+				startTime: 3,
+				autoStart: true,
+				forceFullScreen: false,
+				showCloseButton: false,
+				showScaleButton: true,
+				width: 320,
+				height: 240,
+				x: 10,
+				y: 400,
+				scrollWithWeb: true,
+			}
+			uexVideo.openPlayer(JSON.stringify(param))
+		}
+
+		function closePlayer() {
+			uexVideo.closePlayer()
+		}
+
+		function record() {
+			var params = {
+				maxDuration: 15,
+				qualityType: 1,
+				bitRateType: 2,
+				fileType: "mp4"
+			}
+			uexVideo.record(JSON.stringify(params));
+		}
+
+		function videoPicker() {
+			uexVideo.videoPicker()
+
+		}
+	</script>
+
+<body>
+<button onclick="openPlayer()">打开视频播放器</button><br /><br />
+<button onclick="closePlayer ()">关闭视频播放器</button><br /><br />
+<button onclick="record()">打开视频录制界面</button><br /><br />
+<button onclick="videoPicker ()">打开视频选择界面</button><br /><br />
+
+</body>
+
+</html>
