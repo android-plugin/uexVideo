@@ -523,6 +523,11 @@ public class VideoPlayerActivityForViewToWeb extends Activity implements OnPrepa
     @Override
     public void onClick(View v) {
         if (v == ivClose) {
+
+            if (displayMode == MODE_FULL_SCEEN) {
+                setVideoDisplayMode(MODE_SCALE);
+            }
+            toogleFullScreen();
             mUexBaseObj.closePlayer(null);
             //this.finish();
         } else if (v == m_ivScreenAdjust) {

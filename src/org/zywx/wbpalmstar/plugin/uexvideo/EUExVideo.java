@@ -23,12 +23,10 @@ import android.app.LocalActivityManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.database.Cursor;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.text.TextUtils;
@@ -303,9 +301,10 @@ public class EUExVideo extends EUExBase implements Parcelable {
         Log.i("-----record------", "-----record------");
         // android6.0以上动态权限申请
         if (mContext.checkCallingOrSelfPermission(Manifest.permission.CAMERA)
+                != PackageManager.PERMISSION_GRANTED||mContext.checkCallingOrSelfPermission(Manifest.permission.RECORD_AUDIO)
                 != PackageManager.PERMISSION_GRANTED){
 //            errorCallback(0, 0, "请先设置权限" + Manifest.permission.CAMERA);
-            requsetPerssions(Manifest.permission.CAMERA, "请先申请权限"
+            requsetPerssionsMore(new String[]{Manifest.permission.CAMERA,Manifest.permission.RECORD_AUDIO}, "请先申请权限"
                     + Manifest.permission.CAMERA, 1);
         } else {
             if (params == null || params.length < 1) {
