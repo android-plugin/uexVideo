@@ -677,7 +677,7 @@ public class VideoPlayerActivityForViewToWeb extends Activity implements OnPrepa
                 if (videoWidth > videoHeight) {
                     int h = screenWidth * videoHeight / videoWidth;
                     int margin = (screenHeight - h) / 2;
-                    lp.setMargins(0, margin, 0, margin);
+                    lp.setMargins(0, margin<0? 0:margin, 0, margin<0? 0:margin);
                     if (scrollWithWeb) {
                         lp.width = screenWidth;
                         lp.height = h;
