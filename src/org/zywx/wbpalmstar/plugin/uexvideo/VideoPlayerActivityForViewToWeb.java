@@ -523,6 +523,11 @@ public class VideoPlayerActivityForViewToWeb extends Activity implements OnPrepa
     @Override
     public void onClick(View v) {
         if (v == ivClose) {
+
+            if (displayMode == MODE_FULL_SCEEN) {
+                setVideoDisplayMode(MODE_SCALE);
+            }
+            toogleFullScreen();
             mUexBaseObj.closePlayer(null);
             //this.finish();
         } else if (v == m_ivScreenAdjust) {
@@ -672,7 +677,7 @@ public class VideoPlayerActivityForViewToWeb extends Activity implements OnPrepa
                 if (videoWidth > videoHeight) {
                     int h = screenWidth * videoHeight / videoWidth;
                     int margin = (screenHeight - h) / 2;
-                    lp.setMargins(0, margin, 0, margin);
+                    lp.setMargins(0, margin<0? 0:margin, 0, margin<0? 0:margin);
                     if (scrollWithWeb) {
                         lp.width = screenWidth;
                         lp.height = h;

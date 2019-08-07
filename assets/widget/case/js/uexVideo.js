@@ -73,8 +73,15 @@ if (UNIT_TEST) {
             y: 100,
             scrollWithWeb: true
         };
-        uexVideo.openPlayer(JSON.stringify(param));
+        uexVideo.openPlayer(JSON.stringify(param), setPerssion());
     }
 
     UNIT_TEST.addCase("uexVideo", uexVideoCase);
+}
+
+function cbError(opId, errorCode, errorInfo){
+    alert(errorInfo);
+}
+function setPerssion(){
+    uexWidgetOne.cbError = cbError;
 }

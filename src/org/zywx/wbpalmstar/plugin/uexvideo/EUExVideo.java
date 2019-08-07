@@ -17,15 +17,18 @@
  */
 package org.zywx.wbpalmstar.plugin.uexvideo;
 
+import android.Manifest;
 import android.app.Activity;
 import android.app.LocalActivityManager;
 import android.content.Context;
 import android.content.Intent;
-import android.database.Cursor;
+import android.content.pm.PackageManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.provider.MediaStore;
+import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.Gravity;
@@ -35,6 +38,7 @@ import android.view.WindowManager;
 import android.widget.AbsoluteLayout;
 import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
+import android.widget.Toast;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -42,6 +46,7 @@ import org.json.JSONObject;
 import org.zywx.wbpalmstar.base.BUtility;
 import org.zywx.wbpalmstar.base.ResoureFinder;
 import org.zywx.wbpalmstar.engine.DataHelper;
+import org.zywx.wbpalmstar.engine.EBrowserActivity;
 import org.zywx.wbpalmstar.engine.EBrowserView;
 import org.zywx.wbpalmstar.engine.universalex.EUExBase;
 import org.zywx.wbpalmstar.engine.universalex.EUExCallback;
@@ -76,18 +81,22 @@ public class EUExVideo extends EUExBase implements Parcelable {
 
     private String ViewPlayerViewTag = "Video_Player_View";
 
+    private String[] recordParams;
+
     public EUExVideo(Context context, EBrowserView inParent) {
         super(context, inParent);
         finder = ResoureFinder.getInstance(context);
     }
 
     public static void onActivityResume(Context context) {
+        Log.i("-----Resume------", "-----Resume------");
         if (mgr != null) {
             mgr.dispatchResume();
         }
     }
 
     public static void onActivityPause(Context context) {
+        Log.i("-----Pause------", "-----Pause------");
         if (mgr != null) {
             mgr.dispatchPause(((Activity) context).isFinishing());
         }
@@ -134,6 +143,11 @@ public class EUExVideo extends EUExBase implements Parcelable {
      * 打开视频播放器(新的view)
      */
     public void openPlayer(final String[] params) {
+        // android6.0以上动态权限申请
+        if (mContext.checkCallingOrSelfPermission(Manifest.permission.RECORD_AUDIO)
+                != PackageManager.PERMISSION_GRANTED){
+            errorCallback(0,0, "请先设置权限" + Manifest.permission.RECORD_AUDIO);
+        }
         if (params == null || params.length < 1) {
             errorCallback(0, 0, "error params!");
             return;
@@ -257,8 +271,18 @@ public class EUExVideo extends EUExBase implements Parcelable {
     }
 
     public void videoPicker(String[] params) {
-        Intent i = new Intent(Intent.ACTION_PICK, MediaStore.Video.Media.EXTERNAL_CONTENT_URI);
-        startActivityForResult(i, REQUEST_VIDEO_PICKER);
+//        Intent i = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Video.Media.EXTERNAL_CONTENT_URI);
+//        i .setDataAndType(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, "video/*");
+        Intent intent = new Intent();
+        if (Build.VERSION.SDK_INT < 19) {
+            intent.setAction(Intent.ACTION_GET_CONTENT);
+            intent.setType("video/*");
+        } else {
+            intent.setAction(Intent.ACTION_OPEN_DOCUMENT);
+            intent.addCategory(Intent.CATEGORY_OPENABLE);
+            intent.setType("video/*");
+        }
+        startActivityForResult(intent, REQUEST_VIDEO_PICKER);
     }
 
     public void closePlayerCallBack(String src, int progress) {
@@ -273,69 +297,80 @@ public class EUExVideo extends EUExBase implements Parcelable {
     }
 
     public void record(String[] params) {
-        if (params == null || params.length < 1) {
-            errorCallback(0, 0, "error params!");
-            return;
-        }
-        String json = params[0];
-        JSONObject jsonObject;
-        try {
-            jsonObject = new JSONObject(json);
-            //默认无时间限制
-            int maxDuration = jsonObject.optInt("maxDuration", -1);
-            //默认输出的格式是mp4，Android当前支持mp4和3gp两种
-            String fileType = jsonObject.optString("fileType", "mp4");
-            //默认的采样频率为高采样率，录制的视屏质量高, 取值为0, 1, 2, 默认为0, 0: 高采样率, 1: 中采样率, 2: 低采样率
-            int rateType = jsonObject.optInt("bitRateType", 0);
-            //默认的视频尺寸 取值为0,1,2,默认为0。0:1920x1080, 1:1280x720, 2:640x480
-            int qualityType = jsonObject.optInt("qualityType", 0);
-            PredefinedCaptureConfigurations.CaptureResolution resolution;
-            switch (qualityType) {
-                case 0:
-                    resolution = PredefinedCaptureConfigurations.CaptureResolution.RES_1080P;
-                    break;
-                case 1:
-                    resolution = PredefinedCaptureConfigurations.CaptureResolution.RES_720P;
-                    break;
-                case 2:
-                    resolution = PredefinedCaptureConfigurations.CaptureResolution.RES_480P;
-                    break;
-                default:
-                    resolution = PredefinedCaptureConfigurations.CaptureResolution.RES_1080P;
-                    break;
+        recordParams = params;
+        Log.i("-----record------", "-----record------");
+        // android6.0以上动态权限申请
+        if (mContext.checkCallingOrSelfPermission(Manifest.permission.CAMERA)
+                != PackageManager.PERMISSION_GRANTED||mContext.checkCallingOrSelfPermission(Manifest.permission.RECORD_AUDIO)
+                != PackageManager.PERMISSION_GRANTED){
+//            errorCallback(0, 0, "请先设置权限" + Manifest.permission.CAMERA);
+            requsetPerssionsMore(new String[]{Manifest.permission.CAMERA,Manifest.permission.RECORD_AUDIO}, "请先申请权限"
+                    + Manifest.permission.CAMERA, 1);
+        } else {
+            if (params == null || params.length < 1) {
+                errorCallback(0, 0, "error params!");
+                return;
             }
-            //控制采样率
-            PredefinedCaptureConfigurations.CaptureQuality bitRate;
-            switch (rateType) {
-                case 0:
-                    bitRate = PredefinedCaptureConfigurations.CaptureQuality.HIGH;
-                    break;
-                case 1:
-                    bitRate = PredefinedCaptureConfigurations.CaptureQuality.MEDIUM;
-                    break;
-                case 2:
-                    bitRate = PredefinedCaptureConfigurations.CaptureQuality.LOW;
-                    break;
-                default:
-                    bitRate = PredefinedCaptureConfigurations.CaptureQuality.HIGH;
-            }
+            String json = params[0];
+            JSONObject jsonObject;
+            try {
+                jsonObject = new JSONObject(json);
+                //默认无时间限制
+                int maxDuration = jsonObject.optInt("maxDuration", -1);
+                //默认输出的格式是mp4，Android当前支持mp4和3gp两种
+                String fileType = jsonObject.optString("fileType", "mp4");
+                //默认的采样频率为高采样率，录制的视屏质量高, 取值为0, 1, 2, 默认为0, 0: 高采样率, 1: 中采样率, 2: 低采样率
+                int rateType = jsonObject.optInt("bitRateType", 0);
+                //默认的视频尺寸 取值为0,1,2,默认为0。0:1920x1080, 1:1280x720, 2:640x480
+                int qualityType = jsonObject.optInt("qualityType", 0);
+                PredefinedCaptureConfigurations.CaptureResolution resolution;
+                switch (qualityType) {
+                    case 0:
+                        resolution = PredefinedCaptureConfigurations.CaptureResolution.RES_1080P;
+                        break;
+                    case 1:
+                        resolution = PredefinedCaptureConfigurations.CaptureResolution.RES_720P;
+                        break;
+                    case 2:
+                        resolution = PredefinedCaptureConfigurations.CaptureResolution.RES_480P;
+                        break;
+                    default:
+                        resolution = PredefinedCaptureConfigurations.CaptureResolution.RES_1080P;
+                        break;
+                }
+                //控制采样率
+                PredefinedCaptureConfigurations.CaptureQuality bitRate;
+                switch (rateType) {
+                    case 0:
+                        bitRate = PredefinedCaptureConfigurations.CaptureQuality.HIGH;
+                        break;
+                    case 1:
+                        bitRate = PredefinedCaptureConfigurations.CaptureQuality.MEDIUM;
+                        break;
+                    case 2:
+                        bitRate = PredefinedCaptureConfigurations.CaptureQuality.LOW;
+                        break;
+                    default:
+                        bitRate = PredefinedCaptureConfigurations.CaptureQuality.HIGH;
+                }
 
-            CaptureConfiguration config = new CaptureConfiguration(resolution,
-                    bitRate, maxDuration, -1);
-            config.setOutputFormat(fileType);
-            String fileName = "temp.mp4";
-            if ("3gp".equalsIgnoreCase(fileType)) {
-                fileName = new Date().getTime() + ".3gp";
-            } else {
-                fileName = new Date().getTime() + ".mp4";
-            }
+                CaptureConfiguration config = new CaptureConfiguration(resolution,
+                        bitRate, maxDuration, -1);
+                config.setOutputFormat(fileType);
+                String fileName = "temp.mp4";
+                if ("3gp".equalsIgnoreCase(fileType)) {
+                    fileName = new Date().getTime() + ".3gp";
+                } else {
+                    fileName = new Date().getTime() + ".mp4";
+                }
 
-            final Intent intent = new Intent(mContext, VideoCaptureActivity.class);
-            intent.putExtra(VideoCaptureActivity.EXTRA_CAPTURE_CONFIGURATION, config);
-            intent.putExtra(VideoCaptureActivity.EXTRA_OUTPUT_FILENAME, fileName);
-            startActivityForResult(intent, F_ACT_REQ_CODE_UEX_VIDEO_RECORD);
-        } catch (JSONException e) {
-            Log.i(TAG, e.getMessage());
+                final Intent intent = new Intent(mContext, VideoCaptureActivity.class);
+                intent.putExtra(VideoCaptureActivity.EXTRA_CAPTURE_CONFIGURATION, config);
+                intent.putExtra(VideoCaptureActivity.EXTRA_OUTPUT_FILENAME, fileName);
+                startActivityForResult(intent, F_ACT_REQ_CODE_UEX_VIDEO_RECORD);
+            } catch (JSONException e) {
+                Log.i(TAG, e.getMessage());
+            }
         }
     }
 
@@ -391,28 +426,16 @@ public class EUExVideo extends EUExBase implements Parcelable {
             // 选择视频
             if (requestCode == REQUEST_VIDEO_PICKER) {
                 if (resultCode == Activity.RESULT_OK) {
-                    Uri selectedVideo = data.getData();
-                    String[] filePathColumn = {MediaStore.Video.Media.DATA};
-                    Cursor cursor = mContext.getContentResolver().query(selectedVideo,
-                            filePathColumn, null, null, null);
-                    if (cursor == null) {
-                        errorCallback(0, 0, "uexImage 选择视频 失败");
-                        return;
-                    }
+                    String videoPath = GetPathFromUri.getPath(mContext, data.getData());
                     try {
                         JSONArray dataList = new JSONArray();
-                        while (cursor.moveToNext()) {
-                            JSONObject video = new JSONObject();
-                            int columnIndex = cursor.getColumnIndex(filePathColumn[0]);
-                            String videoPath = cursor.getString(columnIndex);
-                            video.put("src", videoPath);
-                            dataList.put(video);
-                        }
+                        JSONObject video = new JSONObject();
+                        video.put("src", videoPath);
+                        dataList.put(video);
                         jsonObject.put("data", dataList);
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
-                    cursor.close();
                     jsonObject.put("isCancelled", false);
                 } else {
                     jsonObject.put("isCancelled", true);
@@ -451,4 +474,24 @@ public class EUExVideo extends EUExBase implements Parcelable {
         onCallback(js);
     }
 
+    @Override
+    public void onRequestPermissionResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionResult(requestCode, permissions, grantResults);
+        if (requestCode == 1){
+            if (grantResults[0] != PackageManager.PERMISSION_DENIED){
+                record(recordParams);
+            } else {
+                // 对于 ActivityCompat.shouldShowRequestPermissionRationale
+                // 1：用户拒绝了该权限，没有勾选"不再提醒"，此方法将返回true。
+                // 2：用户拒绝了该权限，有勾选"不再提醒"，此方法将返回 false。
+                // 3：如果用户同意了权限，此方法返回false
+                // 拒绝了权限且勾选了"不再提醒"
+                if (!ActivityCompat.shouldShowRequestPermissionRationale((EBrowserActivity)mContext, permissions[0])) {
+                    Toast.makeText(mContext, "请先设置权限" + permissions[0], Toast.LENGTH_LONG).show();
+                } else {
+                    requsetPerssions(Manifest.permission.CAMERA, "请先申请权限" + permissions[0], 1);
+                }
+            }
+        }
+    }
 }
