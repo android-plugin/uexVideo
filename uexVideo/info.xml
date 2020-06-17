@@ -1,7 +1,8 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <uexplugins>
-    <plugin uexName="uexVideo" version="4.3.12" build = "12">
-        <info>11:修复部分手机全屏播放视频时候，视频内容遮挡</info>
+    <plugin uexName="uexVideo" version="4.3.13" build = "2019103001">
+        <info>13:修复部分Android9机型中无法打开视频播放的问题</info>
+        <build>12:修复部分手机全屏播放视频时候，视频内容遮挡</build>
         <build>11:修复视频录制横屏之后退出整个应用横屏</build>
         <build>10:修复视频录制方法闪退</build>
         <build>9:添加动态权限申请;修复魅族手机上videoPicker方法在小米手机打开的不是视频列表</build>
