@@ -11,7 +11,7 @@
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
 
 
-    <android:uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 
     <application
         android:name="org.zywx.wbpalmstar.widgetone.WidgetOneApplication"
@@ -20,7 +20,7 @@
         android:icon="@drawable/icon"
         android:debuggable="true"
         android:label="uexVideo"
-        tools:replace="android:label">
+        tools:replace="android:label,android:icon,android:debuggable">
         <activity
             android:name="org.zywx.wbpalmstar.engine.LoadingActivity"
             android:configChanges="keyboardHidden|orientation"
@@ -38,12 +38,12 @@
             android:name="org.zywx.wbpalmstar.plugin.uexvideo.VideoPlayerActivity"
             android:configChanges="orientation|keyboardHidden"
             android:screenOrientation="landscape"
-            android:theme="@android:style/Theme.NoTitleBar.Fullscreen" />
+            android:theme="@style/plugin_uexvideo_fullscreen" />
         <activity
             android:name="org.zywx.wbpalmstar.plugin.uexvideo.VideoPlayerActivityForViewToWeb"
             android:configChanges="orientation|keyboardHidden"
             android:screenOrientation="landscape"
-            android:theme="@android:style/Theme.NoTitleBar.Fullscreen" />
+            android:theme="@style/plugin_uexvideo_fullscreen" />
         <!-- uexVideo end -->
         <activity android:name="org.zywx.wbpalmstar.plugin.uexvideo.lib.VideoCaptureActivity"></activity>
     </application>

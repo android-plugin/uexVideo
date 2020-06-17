@@ -29,14 +29,14 @@
 			uexVideo.onVideoPickerClosed = function(data) {
 				alert("onVideoPickerClosed:" + JSON.stringify(data));
 			};
-
+            openPlayer();
 		}
 
 		uexVideo.onExportWithProgress = function(progress) {
 			console.log(progress);
 		}
 
-		function openPlayer() {
+		function openPlayer_bak() {
 			var param = {
 				src: "res://1.mp4",
 				startTime: 3,
@@ -51,6 +51,23 @@
 				scrollWithWeb: true,
 			}
 			uexVideo.openPlayer(JSON.stringify(param))
+		}
+
+		function openPlayer(){
+		    var param = {
+                src : "http://a.fehorizon.com/dl/fish.mp4",
+                startTime : 1,
+                autoStart : true,
+                forceFullScreen : false,
+                showCloseButton : true,
+                showScaleButton : true,
+                width : 320,
+                height : 240,
+                x : 0,
+                y : 0,
+                scrollWithWeb : true,
+            }
+            uexVideo.openPlayer(JSON.stringify(param))
 		}
 
 		function closePlayer() {
