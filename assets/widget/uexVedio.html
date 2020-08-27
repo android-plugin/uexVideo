@@ -48,7 +48,7 @@
 				height: 240,
 				x: 10,
 				y: 400,
-				scrollWithWeb: true,
+				scrollWithWeb: false,
 			}
 			uexVideo.openPlayer(JSON.stringify(param))
 		}
@@ -57,7 +57,7 @@
 		    var param = {
                 src : "http://a.fehorizon.com/dl/fish.mp4",
                 startTime : 1,
-                autoStart : true,
+                autoStart : false,
                 forceFullScreen : false,
                 showCloseButton : true,
                 showScaleButton : true,
@@ -66,6 +66,7 @@
                 x : 0,
                 y : 0,
                 scrollWithWeb : true,
+                disableAutoUrlEncode : false
             }
             uexVideo.openPlayer(JSON.stringify(param))
 		}
