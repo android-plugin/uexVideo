@@ -1,7 +1,8 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <uexplugins>
-    <plugin uexName="uexVideo" version="4.3.13" build = "2019103001">
-        <info>13:修复部分Android9机型中无法打开视频播放的问题</info>
+    <plugin uexName="uexVideo" version="4.3.14" build = "2020082701">
+        <info>14:修复某些情况下，由于urlencode逻辑破坏了url内容导致视频请求失败的问题，并增加了disableAutoUrlEncode参数用于直接禁用url自动转码功能，由JS自行处理后传入。</info>
+        <build>13:修复部分Android9机型中无法打开视频播放的问题</build>
         <build>12:修复部分手机全屏播放视频时候，视频内容遮挡</build>
         <build>11:修复视频录制横屏之后退出整个应用横屏</build>
         <build>10:修复视频录制方法闪退</build>
