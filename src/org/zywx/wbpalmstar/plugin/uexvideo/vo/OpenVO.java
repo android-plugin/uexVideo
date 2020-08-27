@@ -31,4 +31,6 @@ public class OpenVO implements Serializable {
 
     public boolean isAutoEndFullScreen = false;
 
+    public boolean disableAutoUrlEncode = false;
+
 }

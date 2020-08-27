@@ -25,6 +25,7 @@ import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.res.AssetFileDescriptor;
 import android.content.res.Configuration;
+import android.media.AudioAttributes;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.media.MediaPlayer.OnBufferingUpdateListener;
@@ -118,6 +119,7 @@ public class VideoPlayerActivityForViewToWeb extends Activity implements OnPrepa
     private boolean showScaleButton; //是否显示 缩放 按钮
     private boolean scrollWithWeb;
     private boolean isAutoEndFullScreen;//是否自动结束全屏播放
+    private boolean disableAutoUrlEncode;//是否禁用url自动encode功能（因为某些情况下自动encode可能破坏url结构导致错误，需要前端针对实际情况自行encode。默认是自动encode的）
 
     private int passTime;
     private int totalTime;
@@ -208,6 +210,7 @@ public class VideoPlayerActivityForViewToWeb extends Activity implements OnPrepa
         showCloseButton = config.showCloseButton;
         scrollWithWeb = config.scrollWithWeb;
         isAutoEndFullScreen = config.isAutoEndFullScreen;
+        disableAutoUrlEncode = config.disableAutoUrlEncode;
 
         setScreenSize();
         setContentView(finder.getLayoutId("plugin_video_player_main2"));
@@ -294,19 +297,25 @@ public class VideoPlayerActivityForViewToWeb extends Activity implements OnPrepa
         });
         mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
         try {
-            if (path.startsWith(BUtility.F_HTTP_PATH) || path.startsWith(BUtility.F_FILE_SCHEMA)
+            if (path.startsWith(BUtility.F_HTTP_PATH) || path.startsWith("https://")
+                    || path.startsWith(BUtility.F_FILE_SCHEMA)
                     || path.startsWith(BUtility.F_RTSP_PATH) || path.startsWith("/")) {// 直接设置路径
                 if (path.startsWith(BUtility.F_FILE_SCHEMA) || path.startsWith("/")) {
                     path = path.replace("file://", "");
                     mediaPlayer.setDataSource(path);
                 } else {
                     String newUrl = path;
-                    int lastLine = path.lastIndexOf("/");
-                    if (lastLine != -1) {
-                        String lastPart = path.substring(lastLine + 1);
-                        String frontPart = path.substring(0, lastLine + 1);
-                        newUrl = frontPart + Uri.encode(lastPart);
+//                    int lastLine = path.lastIndexOf("");
+//                    if (lastLine != -1) {
+//                        String lastPart = path.substring(lastLine + 1);
+//                        String frontPart = path.substring(0, lastLine + 1);
+////                        newUrl = frontPart + Uri.encode(lastPart);
+//                        newUrl = frontPart + Uri.encode(lastPart,"=?&:/");
+//                    }
+                    if (!disableAutoUrlEncode){
+                        newUrl = Uri.encode(newUrl,"=?&:/");
                     }
+                    Log.i(TAG, "MediaPlayer setDataSource = " + newUrl);
                     mediaPlayer.setDataSource(newUrl);
                 }
             } else if (path.startsWith(BUtility.F_Widget_RES_SCHEMA)) {// RES协议下文件
@@ -717,7 +726,7 @@ public class VideoPlayerActivityForViewToWeb extends Activity implements OnPrepa
     public boolean onError(MediaPlayer mp, int what, int extra) {
         BDebug.log("onError------->  what: " + what + "  extra: " + extra);
         //alertMessage(finder.getString("plugin_video_can_not_support_this_format_video_playback"), true);
-        onPlayerStatusChange(PALYER_STATUS_ERROR);
+        onPlayerStatusChange(PALYER_STATUS_ERROR, what, extra);
         return true;
     }
 
@@ -834,15 +843,19 @@ public class VideoPlayerActivityForViewToWeb extends Activity implements OnPrepa
     }
 
     private void onPlayerStatusChange(int status) {
+        onPlayerStatusChange(status, 0, 0);
+    }
+
+    private void onPlayerStatusChange(int status, int errorCode1, int errorCode2) {
         JSONObject jsonObject = new JSONObject();
         try {
             jsonObject.put("status", status);
+            jsonObject.put("errorCode1", errorCode1);
+            jsonObject.put("errorCode2", errorCode2);
             mUexBaseObj.callBackPluginJs(EUExVideo.F_CALLBACK_ON_PLAYER_STATUS_CHANGE, jsonObject.toString());
         } catch (JSONException e) {
             Log.i(TAG, e.getMessage());
         }
-
-
     }
 
     private void notifyStopMusicPlay() {
