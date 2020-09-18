@@ -77,6 +77,8 @@ public class EUExVideo extends EUExBase implements Parcelable {
     private static LocalActivityManager mgr;
     private String TAG = "EUExVideo";
 
+    private String PLAYER_ACTIVITY_TAG = "TAG_Video";
+
     private boolean scrollWithWeb = false;
 
     private String ViewPlayerViewTag = "Video_Player_View";
@@ -209,7 +211,7 @@ public class EUExVideo extends EUExBase implements Parcelable {
                     mgr = new LocalActivityManager((Activity) mContext, true);
                     mgr.dispatchCreate(null);
                 }
-                Window window = mgr.startActivity("TAG_Video", intent);
+                Window window = mgr.startActivity(PLAYER_ACTIVITY_TAG, intent);
                 mMapDecorView = window.getDecorView();
 
                 RelativeLayout.LayoutParams lp;
@@ -258,13 +260,17 @@ public class EUExVideo extends EUExBase implements Parcelable {
             @Override
             public void run() {
                 if (mMapDecorView != null) {
+                    Activity localActivity = mgr.getActivity(PLAYER_ACTIVITY_TAG);
+                    if (localActivity instanceof IVideoPlayerControl){
+                        ((IVideoPlayerControl)localActivity).finishVideoPlayerActivity();
+                    }
                     if (scrollWithWeb) {
                         removeViewFromWebView(ViewPlayerViewTag);
                     } else {
                         removeViewFromCurrentWindow(mMapDecorView);
                     }
                     mMapDecorView = null;
-                    mgr.destroyActivity("TAG_Video", true);
+                    mgr.destroyActivity(PLAYER_ACTIVITY_TAG, true);
                 }
             }
         });

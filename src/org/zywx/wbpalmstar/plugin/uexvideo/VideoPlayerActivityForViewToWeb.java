@@ -77,7 +77,8 @@ import org.zywx.wbpalmstar.plugin.uexvideo.vo.OpenVO;
  */
 public class VideoPlayerActivityForViewToWeb extends Activity implements OnPreparedListener, OnClickListener,
         OnSeekBarChangeListener, OnCompletionListener, OnErrorListener, OnVideoSizeChangedListener,
-        OnBufferingUpdateListener {
+        OnBufferingUpdateListener,
+        IVideoPlayerControl {
 
     public static final String TAG = "VideoPlayerActivity";
     private final static int ACTION_UPDATE_PASS_TIME = 1;
@@ -530,13 +531,16 @@ public class VideoPlayerActivityForViewToWeb extends Activity implements OnPrepa
     }
 
     @Override
+    public void finishVideoPlayerActivity(){
+        if (displayMode == MODE_FULL_SCEEN) {
+            setVideoDisplayMode(MODE_SCALE);
+        }
+        toogleFullScreen();
+    }
+
+    @Override
     public void onClick(View v) {
         if (v == ivClose) {
-
-            if (displayMode == MODE_FULL_SCEEN) {
-                setVideoDisplayMode(MODE_SCALE);
-            }
-            toogleFullScreen();
             mUexBaseObj.closePlayer(null);
             //this.finish();
         } else if (v == m_ivScreenAdjust) {
