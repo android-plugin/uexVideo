@@ -1,6 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <uexplugins>
-    <plugin uexName="uexVideo" version="4.3.14" build = "2020082701">
+    <plugin uexName="uexVideo" version="4.3.15.1" build = "2020091801">
+        <info>15.1:修复视频播放横竖屏切换时有时无法切换回竖屏的问题</info>
         <info>14:修复某些情况下，由于urlencode逻辑破坏了url内容导致视频请求失败的问题，并增加了disableAutoUrlEncode参数用于直接禁用url自动转码功能，由JS自行处理后传入。</info>
         <build>13:修复部分Android9机型中无法打开视频播放的问题</build>
         <build>12:修复部分手机全屏播放视频时候，视频内容遮挡</build>

@@ -77,7 +77,8 @@ import org.zywx.wbpalmstar.plugin.uexvideo.vo.OpenVO;
  */
 public class VideoPlayerActivityForViewToWeb extends Activity implements OnPreparedListener, OnClickListener,
         OnSeekBarChangeListener, OnCompletionListener, OnErrorListener, OnVideoSizeChangedListener,
-        OnBufferingUpdateListener {
+        OnBufferingUpdateListener,
+        IVideoPlayerControl {
 
     public static final String TAG = "VideoPlayerActivity";
     private final static int ACTION_UPDATE_PASS_TIME = 1;
@@ -530,13 +531,16 @@ public class VideoPlayerActivityForViewToWeb extends Activity implements OnPrepa
     }
 
     @Override
+    public void finishVideoPlayerActivity(){
+        if (displayMode == MODE_FULL_SCEEN) {
+            setVideoDisplayMode(MODE_SCALE);
+        }
+        toogleFullScreen();
+    }
+
+    @Override
     public void onClick(View v) {
         if (v == ivClose) {
-
-            if (displayMode == MODE_FULL_SCEEN) {
-                setVideoDisplayMode(MODE_SCALE);
-            }
-            toogleFullScreen();
             mUexBaseObj.closePlayer(null);
             //this.finish();
         } else if (v == m_ivScreenAdjust) {
@@ -670,6 +674,7 @@ public class VideoPlayerActivityForViewToWeb extends Activity implements OnPrepa
         if (mode == MODE_FULL_SCEEN) { //全屏
             VideoPlayerActivityForViewToWeb.this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
             setScreenSize();
+            displayMode = mode;
             if (videoHeight != 0 && videoWidth != 0) {
 //                // 计算屏幕与视频的缩放比
 //                final float widthScaleRate = (float) screenWidth / (float) videoWidth;
@@ -703,7 +708,6 @@ public class VideoPlayerActivityForViewToWeb extends Activity implements OnPrepa
                 }
                 m_display.setLayoutParams(lp);
                 m_display.getHolder().setFixedSize(lp.width, lp.height);
-                displayMode = mode;
                 m_ivScreenAdjust.setBackgroundResource(finder.getDrawableId("plugin_video_fullscreen_selector"));
 
 
@@ -714,11 +718,12 @@ public class VideoPlayerActivityForViewToWeb extends Activity implements OnPrepa
 //            lp.height = h_activity;
 //            lp.width = w_activity;
             // m_display.setLayoutParams(lp);
-            LayoutParams lp = setSurfaceViewParams();
-            m_display.getHolder().setFixedSize(lp.width, lp.height);
             displayMode = mode;
-            m_ivScreenAdjust.setBackgroundResource(finder.getDrawableId("plugin_video_actualsize_selector"));
-
+            if (videoHeight != 0 && videoWidth != 0) {
+                LayoutParams lp = setSurfaceViewParams();
+                m_display.getHolder().setFixedSize(lp.width, lp.height);
+                m_ivScreenAdjust.setBackgroundResource(finder.getDrawableId("plugin_video_actualsize_selector"));
+            }
         }
     }
 
